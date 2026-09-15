@@ -3,7 +3,7 @@
 STFCOUS is a self-supervised deep learning framework for spatial domain identification in spatial transcriptomics. It learns spot-level representations from gene expression profiles and spatial coordinates through competence-weighted multi-level graph contrastive learning, without requiring any histological annotation.
 
 ## Framework Overview
-![STFCOUS Framework](Figure/STFCOUS.pdf)
+![STFCOUS Framework](Figure/STFCOUS.jpg)
 
 The framework mainly includes five components:
 
