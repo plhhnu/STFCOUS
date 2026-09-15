@@ -1,0 +1,77 @@
+# ============================================================================
+# STFCOUS environment
+#
+# Python environment for running STFCOUS (DLPFC-main.py / model.py / util.py /
+# preprocess.py). Only the direct dependencies are listed; indirect
+# dependencies (h5py, numba, threadpoolctl, ...) are resolved automatically
+# by pip and are intentionally not pinned here.
+#
+# Tested on: Linux, Python 3.8.20, CUDA Toolkit 11.8,
+#            NVIDIA GeForce RTX 2080 Ti GPUs.
+#
+# NOTE: R is NOT installed by this file. Install R together with the `mclust`
+# package first; see README.md -> Installation -> Option 1, Step 1.
+#
+# Usage:
+#   conda create -n stfcous python=3.8 r-base r-essentials -y
+#   conda activate stfcous
+#   conda env update -n stfcous -f environment.yml
+# ============================================================================
+
+name: stfcous
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  # ------------------------------------------------------------------- conda
+  - python=3.8.20
+  - pip=24.2
+  - setuptools=75.1.0
+  - wheel=0.44.0
+
+  # --------------------------------------------------------------------- pip
+  - pip:
+      # extra wheel sources: PyTorch CUDA 11.8 builds + matching PyG binaries
+      - --extra-index-url https://download.pytorch.org/whl/cu118
+      - --find-links https://data.pyg.org/whl/torch-2.2.0+cu118.html
+
+      # --- deep learning core ------------------------------------------------
+      # model.py      : DyT and ResGCN encoder (torch.nn)
+      # DLPFC-main.py : training loop and contrastive losses
+      - torch==2.2.2+cu118
+
+      # --- PyTorch Geometric stack ---------------------------------------------
+      # preprocess.py : Transfer_pytorch_Data() builds torch_geometric.data.Data
+      - torch-geometric==2.5.2
+      # acceleration backends used internally by PyG (not imported directly)
+      - torch-scatter==2.1.2+pt22cu118
+      - torch-sparse==0.6.18+pt22cu118
+
+      # --- single-cell data stack ----------------------------------------------
+      # util.py       : load_data1() reads the Visium h5 matrix and metadata.tsv
+      #                 evaluate() / mclust_R() run PCA + mclust clustering
+      # preprocess.py : HVG selection, normalize_total, log1p, scale
+      - scanpy==1.9.3
+      - anndata==0.9.1
+
+      # --- numerical and data handling ------------------------------------------
+      # util.py / preprocess.py / DLPFC-main.py : arrays, DataFrames, sparse graph
+      - numpy==1.22.4
+      - pandas==2.0.3
+      - scipy==1.10.1
+      - scikit-learn==1.3.0            # spatial graph (NearestNeighbors), PCA, ARI/NMI
+
+      # --- visualization ----------------------------------------------------------
+      # DLPFC-main.py : spatial domain maps, UMAP, darkened figures via PIL
+      # util.py       : Stats_Spatial_Net() neighbour statistics
+      - matplotlib==3.7.1
+      - pillow==10.2.0
+      - umap-learn==0.5.7              # UMAP of the learned embedding
+
+      # --- clustering and evaluation -----------------------------------------------
+      # util.py       : mclust_R() drives the R package mclust through rpy2
+      #                 Hungarian matching of cluster labels via munkres
+      - rpy2==3.5.11
+      - munkres==1.1.4
